@@ -7,6 +7,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const PORT = process.env.PORT || 4040;
+const ws = require('ws');
 dotenv.config();
 
 mongoose.connect(process.env.MONGO_URL);
@@ -88,4 +89,42 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`server listening on port ${PORT}`));
+const server = app.listen(PORT, () =>
+  console.log(`server listening on port ${PORT}`)
+);
+
+const wss = new ws.WebSocketServer({ server });
+
+wss.on('connection', (connection, req) => {
+  const cookies = req.headers.cookie;
+  if (cookies) {
+    const tokenCookieStr = cookies
+      .split(';')
+      .find((str) => str.startsWith('token='));
+
+    if (tokenCookieStr) {
+      const token = tokenCookieStr.split('=')[1];
+      if (token) {
+        jwt.verify(token, jwtSecret, {}, (err, userData) => {
+          if (err) throw err;
+
+          const { userId, username } = userData;
+
+          connection.userId = userId;
+          connection.username = username;
+        });
+      }
+    }
+  }
+
+  [...wss.clients].forEach((client) => {
+    client.send(
+      JSON.stringify({
+        online: [...wss.clients].map((c) => ({
+          userId: c.userId,
+          username: c.username
+        }))
+      })
+    );
+  });
+});

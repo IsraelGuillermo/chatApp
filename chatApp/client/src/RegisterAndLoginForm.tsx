@@ -7,9 +7,7 @@ export default function RegisterAndLoginForm() {
   const [isLoginOrRegister, setIsLoginOrRegister] = useState('register');
   const { setLoggedInUser, setId } = useContext(UserContext);
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const url = isLoginOrRegister === 'register' ? 'register' : 'login';
     const { data } = await axios.post(url, { username, password });
