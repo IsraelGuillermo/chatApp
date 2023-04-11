@@ -1,6 +1,5 @@
-import { Schema } from 'mongoose';
 const mongoose = require('mongoose');
-const UserSchema = new Schema(
+const UserSchema = new mongoose.Schema(
   {
     username: { type: String, unique: true },
     password: String
