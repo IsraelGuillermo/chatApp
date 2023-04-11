@@ -1,15 +1,18 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import axios from 'axios';
+import { UserContext } from './UserContext';
 export default function Register() {
-  const [userName, setUsername] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
+  const { setLoggedInUser, setId } = useContext(UserContext);
   const register: React.FormEventHandler<HTMLFormElement> = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
+    const { data } = await axios.post('/register', { username, password });
 
-    await axios.post('/register', { userName, password });
+    setLoggedInUser(username);
+    setId(data._id);
   };
 
   return (
@@ -17,7 +20,7 @@ export default function Register() {
       <form className='w-64 mx-auto mb-12' onSubmit={register}>
         <input
           type='text'
-          value={userName}
+          value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder='username'
           className='block w-full rounded-sm p-2 mb-2 border'

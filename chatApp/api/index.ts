@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const User = require('./models/user');
+const User = require('./models/User');
 const cors = require('cors');
 const PORT = process.env.PORT || 4040;
 dotenv.config();
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(
   cors({
     credentials: true,
-    origin: process.env.CLIENT_URL || 'http://localhost:5173/'
+    origin: process.env.CLIENT_URL
   })
 );
 
