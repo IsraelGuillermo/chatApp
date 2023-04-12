@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import Avatar from './Avatar';
 
 export default function Chat() {
   const [ws, setWs] = useState<WebSocket>();
   const [peopleOnline, setPeopleOnline] = useState();
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:4040');
     setWs(ws);
@@ -12,7 +14,7 @@ export default function Chat() {
   function showOnlinePeople(peopleArr: any) {
     const people: any = {};
 
-    peopleArr.forEach(({ userId, username }) => {
+    peopleArr.forEach(({ userId, username }: any) => {
       people[userId] = username;
     });
     setPeopleOnline(people);
@@ -24,10 +26,12 @@ export default function Chat() {
       showOnlinePeople(messageData.online);
     }
   }
+
+  console.log(selectedUserId);
   return (
     <div className='flex h-screen'>
-      <div className='bg-white w-1/3 p-2'>
-        <div className='text-blue-600 font-bold flex gap-2'>
+      <div className='bg-white w-1/3'>
+        <div className='text-blue-600 font-bold flex gap-2 p-4'>
           <svg
             xmlns='http://www.w3.org/2000/svg'
             viewBox='0 0 24 24'
@@ -44,8 +48,15 @@ export default function Chat() {
         </div>
         {peopleOnline &&
           Object.keys(peopleOnline).map((userId) => (
-            <div className='border-b border-gray-100 py-2' key={userId}>
-              {peopleOnline[userId]}
+            <div
+              className={`border-b border-gray-100 py-2 pl-4 flex items-center gap-3 cursor-pointer ${
+                userId === selectedUserId ? 'bg-blue-100' : ''
+              }`}
+              key={userId}
+              onClick={() => setSelectedUserId(userId)}
+            >
+              <Avatar userId={userId} username={peopleOnline[userId]} />
+              <span className='text-grey-700'>{peopleOnline[userId]}</span>
             </div>
           ))}
       </div>
