@@ -50,7 +50,7 @@ export default function Chat() {
           Object.keys(peopleOnline).map((userId) => (
             <div
               className={`border-b border-gray-100 py-2 pl-4 flex items-center gap-3 cursor-pointer ${
-                userId === selectedUserId ? 'bg-blue-100' : ''
+                userId === selectedUserId ? 'bg-blue-50' : ''
               }`}
               key={userId}
               onClick={() => setSelectedUserId(userId)}
