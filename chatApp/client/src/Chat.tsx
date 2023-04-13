@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import Avatar from './Avatar';
 import Logo from './Logo';
 import { UserContext } from './UserContext';
@@ -10,6 +10,8 @@ export default function Chat() {
   const [selectedUserId, setSelectedUserId] = useState<any>();
   const [newMessageText, setNewMessageText] = useState<any>();
   const [messages, setMessages] = useState<any>();
+  const divUnderMessages: React.MutableRefObject<HTMLElement | undefined> =
+    useRef();
   const { id } = useContext(UserContext);
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:4040');
@@ -49,9 +51,21 @@ export default function Chat() {
     setNewMessageText('');
     setMessages((prev: any) => [
       ...(prev || []),
-      { text: newMessageText, isOur: true }
+      {
+        text: newMessageText,
+        sender: id,
+        recipient: selectedUserId,
+        id: Date.now()
+      }
     ]);
   }
+
+  useEffect(() => {
+    const div = divUnderMessages.current;
+    if (div) {
+      div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  }, [messages]);
 
   const messagesWithoutDuplicates = uniqBy(messages, 'id');
 
@@ -81,10 +95,28 @@ export default function Chat() {
       <div className='flex flex-col bg-blue-50 w-2/3 p-2'>
         <div className='flex-grow'>
           {selectedUserId ? (
-            <div>
-              {messagesWithoutDuplicates?.map((message: any) => (
-                <div key={message}>{message.text}</div>
-              ))}
+            <div className='relative h-full'>
+              <div className='overflow-y-scroll absolute top-0 left-0 right-0 bottom-2'>
+                {messagesWithoutDuplicates?.map((message: any) => (
+                  <div
+                    className={`${
+                      message.sender === id ? 'text-right' : 'text-left'
+                    }`}
+                  >
+                    <div
+                      key={message.id}
+                      className={`text-left inline-block p-2 my-2 rounded-lg text-sm ${
+                        message.sender === id
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-white text-gray-500'
+                      }`}
+                    >
+                      {message.text}
+                    </div>
+                  </div>
+                ))}
+                <div className='h-12' ref={divUnderMessages}></div>
+              </div>
             </div>
           ) : (
             <div className='h-full flex items-center justify-center'>
@@ -97,6 +129,7 @@ export default function Chat() {
         {!!selectedUserId && (
           <form className='flex gap-2' onSubmit={handleSendMessage}>
             <input
+              multiple
               value={newMessageText}
               onChange={(e) => setNewMessageText(e.target.value)}
               type='text'
