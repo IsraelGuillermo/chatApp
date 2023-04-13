@@ -1,3 +1,5 @@
+import { Box } from '@material-ui/core';
+
 export default function Avatar({ userId, username }: any) {
   const colors = [
     'bg-purple-200',
@@ -14,8 +16,8 @@ export default function Avatar({ userId, username }: any) {
   const color = colors[colorIndex];
 
   return (
-    <div className={`w-10 h-10 rounded-full flex items-center ${color}`}>
-      <div className='w-full text-center opacity-70'>{username[0]}</div>
-    </div>
+    <Box className={`w-10 h-10 rounded-full flex items-center ${color}`}>
+      <Box className='w-full text-center opacity-70'>{username[0]}</Box>
+    </Box>
   );
 }
