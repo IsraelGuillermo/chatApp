@@ -1,6 +1,6 @@
 import { Box } from '@material-ui/core';
 
-export default function Avatar({ userId, username }: any) {
+export default function Avatar({ userId, username, online }: any) {
   const colors = [
     'bg-purple-200',
     'bg-red-200',
@@ -16,8 +16,18 @@ export default function Avatar({ userId, username }: any) {
   const color = colors[colorIndex];
 
   return (
-    <Box className={`w-10 h-10 rounded-full flex items-center ${color}`}>
-      <Box className='w-full text-center opacity-70'>{username[0]}</Box>
+    <Box
+      className={`w-10 h-10 relative rounded-full flex items-center ${color} shadow-sm shadow-black`}
+    >
+      <Box className='w-full text-center opacity-70'>
+        {username}
+        {online && (
+          <Box className='w-3 h-3 absolute bg-green-500 right-0 bottom-0 rounded-full border border-white shadow-md shadow-black'></Box>
+        )}
+        {!online && (
+          <Box className='w-3 h-3 absolute bg-gray-500 right-0 bottom-0 rounded-full border border-white shadow-md shadow-black'></Box>
+        )}
+      </Box>
     </Box>
   );
 }

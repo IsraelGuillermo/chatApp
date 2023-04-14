@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const PORT = process.env.PORT || 4040;
 const ws = require('ws');
 const Message = require('./models/Message');
+const fs = require('fs');
 dotenv.config();
 
 mongoose.connect(process.env.MONGO_URL);
@@ -16,6 +17,7 @@ const jwtSecret = process.env.JWT_SECRET;
 const bcryptSalt = bcrypt.genSaltSync(10);
 const app = express();
 app.use(express.json());
+app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(cookieParser());
 app.use(
   cors({
@@ -35,6 +37,19 @@ async function getUserDataFromRequest(req) {
     } else {
       reject('No Token');
     }
+  });
+}
+
+function notifyAboutOnlinePeople() {
+  [...wss.clients].forEach((client) => {
+    client.send(
+      JSON.stringify({
+        online: [...wss.clients].map((c) => ({
+          userId: c.userId,
+          username: c.username
+        }))
+      })
+    );
   });
 }
 
@@ -70,6 +85,10 @@ app.post('/login', async (req, res) => {
       );
     }
   }
+});
+
+app.post('/logout', (req, res) => {
+  res.cookie('token', '', { sameSite: 'none', secure: true }).json('ok');
 });
 
 app.post('/register', async (req, res) => {
@@ -113,6 +132,11 @@ app.get('/messages/:userId', async (req, res) => {
   res.json(messages);
 });
 
+app.get('/people', async (req, res) => {
+  const users = await User.find({}, { _id: 1, username: 1 });
+  res.json(users);
+});
+
 const server = app.listen(PORT, () =>
   console.log(`server listening on port ${PORT}`)
 );
@@ -120,6 +144,20 @@ const server = app.listen(PORT, () =>
 const wss = new ws.WebSocketServer({ server });
 
 wss.on('connection', (connection, req) => {
+  connection.isAlive = true;
+  connection.timer = setInterval(() => {
+    connection.ping();
+    connection.deathTimer = setTimeout(() => {
+      connection.isAlive = false;
+      clearInterval(connection.timer);
+      connection.terminate();
+      notifyAboutOnlinePeople();
+    }, 1000);
+  }, 5000);
+
+  connection.on('pong', () => {
+    clearTimeout(connection.deathTimer);
+  });
   //read username and ID from cookie connection
   const cookies = req.headers.cookie;
   if (cookies) {
@@ -145,13 +183,26 @@ wss.on('connection', (connection, req) => {
   connection.on('message', async (message) => {
     const messageData = JSON.parse(message.toString());
 
-    const { recipient, text } = messageData;
+    const { recipient, text, file } = messageData;
+    let filename = '';
 
-    if (recipient && text) {
+    if (file) {
+      const parts = file.name.split('.');
+      const ext = parts[parts.length - 1];
+      filename = Date.now() + '.' + ext;
+      const path = __dirname + '/uploads/' + filename;
+      const bufferData = Buffer.from(file.data.split(',')[1], 'base64');
+      fs.writeFile(path, bufferData, () => {
+        console.log('file saved' + path);
+      });
+    }
+
+    if ((recipient && text) || (recipient && file)) {
       const messageDoc = await Message.create({
         sender: connection.userId,
         recipient,
-        text
+        text,
+        file: file ? filename : null
       });
       [...wss.clients]
         .filter((client) => client.userId === recipient)
@@ -167,15 +218,7 @@ wss.on('connection', (connection, req) => {
         );
     }
   });
+
   // notify client of users online
-  [...wss.clients].forEach((client) => {
-    client.send(
-      JSON.stringify({
-        online: [...wss.clients].map((c) => ({
-          userId: c.userId,
-          username: c.username
-        }))
-      })
-    );
-  });
+  notifyAboutOnlinePeople();
 });
