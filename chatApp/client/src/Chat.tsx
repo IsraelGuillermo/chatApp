@@ -5,21 +5,37 @@ import { UserContext } from './UserContext';
 import { uniqBy } from 'lodash';
 import { Box, TextField, Button } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
+import axios from 'axios';
 
 export default function Chat() {
   const [ws, setWs] = useState<any>();
   const [peopleOnline, setPeopleOnline] = useState<any>();
   const [selectedUserId, setSelectedUserId] = useState<any>();
-  const [newMessageText, setNewMessageText] = useState<any>();
+  const [newMessageText, setNewMessageText] = useState<any>('');
   const [messages, setMessages] = useState<any>();
   const divUnderMessages: React.MutableRefObject<HTMLElement | undefined> =
     useRef();
   const { id } = useContext(UserContext);
+
   useEffect(() => {
+    if (selectedUserId) {
+      axios.get(`/messages/${selectedUserId}`).then((response) => {
+        const { data } = response;
+        setMessages(data);
+      });
+    }
+  }, [selectedUserId]);
+
+  function connectToWs() {
     const ws = new WebSocket('ws://localhost:4040');
     setWs(ws);
     ws.addEventListener('message', handleMessage);
-  }, []);
+    ws.addEventListener('close', () => {
+      setTimeout(() => {
+        connectToWs();
+      }, 1000);
+    });
+  }
 
   function showOnlinePeople(peopleArr: any) {
     const people: any = {};
@@ -57,11 +73,13 @@ export default function Chat() {
         text: newMessageText,
         sender: id,
         recipient: selectedUserId,
-        id: Date.now()
+        _id: Date.now()
       }
     ]);
   }
-
+  useEffect(() => {
+    connectToWs();
+  }, []);
   useEffect(() => {
     const div = divUnderMessages.current;
     if (div) {
@@ -69,7 +87,7 @@ export default function Chat() {
     }
   }, [messages]);
 
-  const messagesWithoutDuplicates = uniqBy(messages, 'id');
+  const messagesWithoutDuplicates = uniqBy(messages, '_id');
 
   return (
     <Box className='flex h-screen'>
@@ -101,12 +119,12 @@ export default function Chat() {
               <Box className='overflow-y-scroll absolute top-0 left-0 right-0 bottom-2'>
                 {messagesWithoutDuplicates?.map((message: any) => (
                   <Box
+                    key={message._id}
                     className={`${
                       message.sender === id ? 'text-right' : 'text-left'
                     }`}
                   >
                     <Box
-                      key={message.id}
                       className={`text-left inline-block p-2 my-2 rounded-lg text-sm ${
                         message.sender === id
                           ? 'bg-blue-500 text-white'
