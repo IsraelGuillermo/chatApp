@@ -7,6 +7,9 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  typography: {
+    color: 'whitesmoke'
   }
 }));
 
@@ -14,7 +17,7 @@ export default function UnselectedState() {
   const classes = useStyles();
   return (
     <Box className={classes.container}>
-      <Typography color='textSecondary'>
+      <Typography className={classes.typography}>
         <ArrowBackIcon />
         Select A Person From the Sidebar
       </Typography>
