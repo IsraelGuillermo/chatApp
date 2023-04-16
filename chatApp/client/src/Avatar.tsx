@@ -1,6 +1,48 @@
 import { Box } from '@material-ui/core';
+import classNames from 'classnames';
+import { makeStyles } from '@material-ui/core/styles';
 
-export default function Avatar({ userId, username, online }: any) {
+const useStyles = makeStyles((theme) => ({
+  container: {
+    width: '2.5rem',
+    height: '2.5rem',
+    position: 'relative',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    border: 'whitesmoke solid 1px',
+    marginRight: 4
+  },
+  status: {
+    width: '.8rem',
+    height: '.8rem',
+    position: 'absolute',
+    borderRadius: '50%',
+    border: 'whitesmoke solid 1px',
+    bottom: 0,
+    right: 0
+  },
+  statusOnline: {
+    backgroundColor: theme.palette.success.main
+  },
+  statusOffline: {
+    backgroundColor: theme.palette.action.disabled
+  },
+  avatarText: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%'
+  }
+}));
+
+interface Props {
+  userId: string;
+  username: string;
+  online: boolean;
+}
+
+export default function Avatar({ userId, username, online }: Props) {
   const colors = [
     'bg-purple-200',
     'bg-red-200',
@@ -14,19 +56,19 @@ export default function Avatar({ userId, username, online }: any) {
   const userIdBase10 = parseInt(userId, 16);
   const colorIndex = userIdBase10 % colors.length;
   const color = colors[colorIndex];
-
+  const classes = useStyles();
   return (
-    <Box
-      className={`w-10 h-10 relative rounded-full flex items-center ${color} shadow-sm shadow-black`}
-    >
-      <Box className='w-full text-center opacity-70'>
+    <Box className={classNames(classes.container, `${color}`)}>
+      <Box className={classes.avatarText}>
         {username}
-        {online && (
-          <Box className='w-3 h-3 absolute bg-green-500 right-0 bottom-0 rounded-full border border-white shadow-md shadow-black'></Box>
-        )}
-        {!online && (
-          <Box className='w-3 h-3 absolute bg-gray-500 right-0 bottom-0 rounded-full border border-white shadow-md shadow-black'></Box>
-        )}
+
+        <Box
+          className={classNames(
+            { [classes.statusOnline]: online },
+            { [classes.statusOffline]: !online },
+            classes.status
+          )}
+        />
       </Box>
     </Box>
   );
