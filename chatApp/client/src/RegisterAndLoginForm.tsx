@@ -1,7 +1,42 @@
-import { useContext, useState } from 'react';
+import { FormEvent, useContext, useState } from 'react';
 import axios from 'axios';
 import { UserContext } from './UserContext';
 import { Box, TextField, Button, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+const useStyles = makeStyles((theme) => ({
+  container: {
+    height: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F0F0F0'
+  },
+  input: {
+    background: theme.palette.common.white
+  },
+  form: {
+    width: '18rem',
+    marginRight: 'auto',
+    marginLeft: 'auto',
+    marginBottom: '3.5rem'
+  },
+  errorContainer: {
+    marginBottom: '1rem',
+    textAlign: 'center'
+  },
+  textInput: {
+    padding: 2,
+    marginBottom: 8
+  },
+  messageContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  typography: {
+    marginRight: 8
+  }
+}));
 
 export default function RegisterAndLoginForm() {
   const [username, setUsername] = useState('');
@@ -12,8 +47,8 @@ export default function RegisterAndLoginForm() {
   const [usernameTaken, setUsernameTake] = useState(false);
   const [incorrectLogin, setIncorrectLogin] = useState(false);
   const { setLoggedInUser, setId } = useContext(UserContext);
-
-  const handleSubmit = async (e: any) => {
+  const classes = useStyles();
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const url = isLoginOrRegister === 'register' ? 'register' : 'login';
     if (username !== '' && password !== '') {
@@ -39,10 +74,10 @@ export default function RegisterAndLoginForm() {
   };
 
   return (
-    <Box className='bg-blue-50 h-screen flex items-center'>
-      <form className='w-72 mx-auto mb-12' onSubmit={handleSubmit}>
+    <Box className={classes.container}>
+      <form className={classes.form} onSubmit={handleSubmit}>
         {incorrectLogin && (
-          <Box className='text-center mb-4'>
+          <Box className={classes.errorContainer}>
             <Typography variant='body1' color='error'>
               Incorrect Username or Password.{' '}
             </Typography>
@@ -53,7 +88,7 @@ export default function RegisterAndLoginForm() {
           variant='outlined'
           size='medium'
           fullWidth
-          style={{ padding: 2, marginBottom: 8 }}
+          className={classes.textInput}
           type='text'
           value={username}
           onChange={(e) => setUsername(e.target.value)}
@@ -63,11 +98,12 @@ export default function RegisterAndLoginForm() {
               ? 'Username Cannot be Empty'
               : '' || (usernameTaken && 'User already exists')
           }
+          InputProps={{ className: classes.input }}
         />
         <TextField
           error={passwordError}
           variant='outlined'
-          style={{ padding: 2, marginBottom: 8 }}
+          className={classes.textInput}
           fullWidth
           type='password'
           value={password}
@@ -76,20 +112,17 @@ export default function RegisterAndLoginForm() {
           helperText={
             passwordError && password === '' ? 'Password Cannot be Empty' : ''
           }
+          InputProps={{ className: classes.input }}
         />
         <Button fullWidth color='primary' variant='contained' type='submit'>
           {isLoginOrRegister === 'register' ? 'Register' : 'Login'}
         </Button>
         <Box className='text-center mt-2'>
           {isLoginOrRegister === 'register' ? (
-            <Box
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <Box style={{ marginRight: 8 }}>Already a member?</Box>
+            <Box className={classes.messageContainer}>
+              <Typography className={classes.typography}>
+                Already a member?
+              </Typography>
 
               <Button
                 variant='text'
@@ -99,14 +132,10 @@ export default function RegisterAndLoginForm() {
               </Button>
             </Box>
           ) : (
-            <Box
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <Box style={{ marginRight: 8 }}>Dont have an account?</Box>
+            <Box className={classes.messageContainer}>
+              <Typography className={classes.typography}>
+                Dont have an account?
+              </Typography>
               <Button
                 variant='text'
                 onClick={() => setIsLoginOrRegister('register')}
