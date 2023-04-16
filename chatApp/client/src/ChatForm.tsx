@@ -10,7 +10,8 @@ const useStyles = makeStyles((theme) => ({
   textField: {
     marginRight: theme.spacing(1),
     flexGrow: 1,
-    backgroundColor: theme.palette.common.white
+    backgroundColor: theme.palette.common.white,
+    borderRadius: 8
   },
   typography: {
     fontWeight: 'bolder',
@@ -21,13 +22,13 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex',
-    backgroundColor: theme.palette.primary.main,
     borderRadius: theme.spacing(0.5),
     cursor: 'pointer',
-    color: theme.palette.common.white,
     marginRight: theme.spacing(1),
+    color: 'whitesmoke',
+    backgroundColor: theme.palette.secondary.main,
     '&:hover': {
-      backgroundColor: theme.palette.primary.dark
+      backgroundColor: theme.palette.secondary.dark
     }
   },
   input: {
@@ -39,34 +40,43 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface Props {
-  onSubmit: () => void;
+  onSubmit: (e: any, file?: any) => Promise<void>;
   value: string;
   onTextChange: (value: string) => void;
-  onFileChange: () => void;
+  onFileChange: (e: any) => void;
+  isMessageEmpty: boolean;
+  setIsMessageEmpty: (value: boolean) => void;
 }
 
 export default function ChatForm({
   onSubmit,
   onFileChange,
   value,
-  onTextChange
+  onTextChange,
+  isMessageEmpty,
+  setIsMessageEmpty
 }: Props) {
   const classes = useStyles();
   return (
     <form className={classes.container} onSubmit={onSubmit}>
       <TextField
+        error={isMessageEmpty}
+        helperText={isMessageEmpty && 'Message cannot be empty'}
         variant='outlined'
         value={value}
-        onChange={(e) => onTextChange(e.target.value)}
+        onChange={(e) => {
+          setIsMessageEmpty(false);
+          onTextChange(e.target.value);
+        }}
         type='text'
         className={classes.textField}
-        placeholder='Type your message here'
+        placeholder='Type your message here...'
       />
       <label className={classes.attachment}>
         <input type='file' className={classes.input} onChange={onFileChange} />
         <AttachFileIcon className={classes.icon} />
       </label>
-      <Button variant='contained' color='primary' type='submit'>
+      <Button variant='contained' color='secondary' type='submit'>
         <SendIcon />
       </Button>
     </form>

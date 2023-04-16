@@ -16,7 +16,7 @@ export default function Chat() {
   const [newMessageText, setNewMessageText] = useState<any>('');
   const [messages, setMessages] = useState<any>();
   const [offlinePeople, setOfflinePeople] = useState({});
-
+  const [isMessageEmpty, setIsMessageEmpty] = useState(false);
   const divUnderMessages: React.MutableRefObject<HTMLElement | undefined> =
     useRef();
   const { loggedInUser, id, setId, setLoggedInUser } = useContext(UserContext);
@@ -67,23 +67,29 @@ export default function Chat() {
       e.preventDefault();
     }
 
-    await ws.send(
-      JSON.stringify({
-        recipient: selectedUserId,
-        text: newMessageText,
-        file
-      })
-    );
-    setNewMessageText('');
-    setMessages((prev: any) => [
-      ...(prev || []),
-      {
-        text: newMessageText,
-        sender: id,
-        recipient: selectedUserId,
-        _id: Date.now()
-      }
-    ]);
+    if (newMessageText === '') {
+      setIsMessageEmpty(true);
+    }
+    if (newMessageText !== '') {
+      await ws.send(
+        JSON.stringify({
+          recipient: selectedUserId,
+          text: newMessageText,
+          file
+        })
+      );
+      setNewMessageText('');
+      setMessages((prev: any) => [
+        ...(prev || []),
+        {
+          text: newMessageText,
+          sender: id,
+          recipient: selectedUserId,
+          _id: Date.now()
+        }
+      ]);
+    }
+
     if (file) {
       axios
         .get('/messages/' + selectedUserId)
@@ -209,6 +215,8 @@ export default function Chat() {
             onTextChange={setNewMessageText}
             onFileChange={sendFile}
             value={newMessageText}
+            isMessageEmpty={isMessageEmpty}
+            setIsMessageEmpty={setIsMessageEmpty}
           />
         )}
       </Box>
