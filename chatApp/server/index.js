@@ -69,8 +69,14 @@ app.get('/profile', (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const foundUser = await User.findOne({ username });
+
   if (foundUser) {
     const passOk = bcrypt.compareSync(password, foundUser.password);
+    if (!passOk) {
+      return res.status(400).json({
+        message: 'Incorrect Username or Password.'
+      });
+    }
     if (passOk) {
       jwt.sign(
         { userId: foundUser._id, username },
@@ -94,6 +100,9 @@ app.post('/logout', (req, res) => {
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, bcryptSalt);
+  const userExist = await User.find({ username: req.body.username });
+  if (userExist.length > 0)
+    return res.status(400).send({ message: 'User already exists' });
   try {
     const createdUser = await User.create({
       username,
