@@ -36,9 +36,9 @@ const useStyles = makeStyles((theme) => ({
 
 interface Props {
   file: any;
-  text: string;
+  text?: string;
   sender: boolean;
-  messageId: string;
+  messageId: number;
 }
 
 export default function MessageBubble({

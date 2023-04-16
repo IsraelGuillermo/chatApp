@@ -9,12 +9,22 @@ import MessageBubble from './MessageBubble';
 import UnselectedState from './UnselectedState';
 import ChatForm from './ChatForm';
 
+type Message = {
+  createdAt?: string;
+  file?: string | null;
+  recipient?: string;
+  sender: string | null;
+  text?: string;
+  updatedAt?: string;
+  __v?: number;
+  _id: number;
+};
 export default function Chat() {
-  const [ws, setWs] = useState<any>();
+  const [ws, setWs] = useState<WebSocket>();
   const [peopleOnline, setPeopleOnline] = useState<any>();
-  const [selectedUserId, setSelectedUserId] = useState<any>();
-  const [newMessageText, setNewMessageText] = useState<any>('');
-  const [messages, setMessages] = useState<any>();
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [newMessageText, setNewMessageText] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [offlinePeople, setOfflinePeople] = useState({});
   const [isMessageEmpty, setIsMessageEmpty] = useState(false);
   const divUnderMessages: React.MutableRefObject<HTMLElement | undefined> =
@@ -55,23 +65,28 @@ export default function Chat() {
     if ('online' in messageData) {
       showOnlinePeople(messageData.online);
     } else if ('text' in messageData) {
-      setMessages((prev: any) => [...(prev || []), { ...messageData }]);
+      setMessages((prev: Message[]) => [...(prev || []), { ...messageData }]);
     }
   }
   const peopleOnlineExcludingSignedUser = { ...peopleOnline };
 
   id && delete peopleOnlineExcludingSignedUser[id];
 
-  async function handleSendMessage(e: any, file: any = null) {
+  async function handleSendMessage(e: any, file?: any) {
     if (e) {
       e.preventDefault();
     }
-
     if (newMessageText === '') {
       setIsMessageEmpty(true);
     }
-    if (newMessageText !== '') {
-      await ws.send(
+    if (file) {
+      if (newMessageText === '') {
+        setIsMessageEmpty(false);
+      }
+      setIsMessageEmpty(false);
+    }
+    if (newMessageText !== '' || file) {
+      await ws?.send(
         JSON.stringify({
           recipient: selectedUserId,
           text: newMessageText,
@@ -79,8 +94,8 @@ export default function Chat() {
         })
       );
       setNewMessageText('');
-      setMessages((prev: any) => [
-        ...(prev || []),
+      setMessages((prevState: Message[]) => [
+        ...(prevState || []),
         {
           text: newMessageText,
           sender: id,
@@ -90,11 +105,9 @@ export default function Chat() {
       ]);
     }
 
-    if (file) {
-      axios
-        .get('/messages/' + selectedUserId)
-        .then((res) => setMessages(res.data));
-    }
+    axios
+      .get('/messages/' + selectedUserId)
+      .then((res) => setMessages(res.data));
   }
 
   useEffect(() => {
@@ -129,14 +142,14 @@ export default function Chat() {
 
   function logout() {
     axios.post('/logout').then(() => {
-      setWs(null);
+      setWs(undefined);
       setId(null);
       setLoggedInUser(null);
     });
   }
   function sendFile(e: any) {
     const reader = new FileReader();
-    if (e.target.files[0]) {
+    if (e?.target?.files[0]) {
       reader.readAsDataURL(e.target.files[0]);
     }
     reader.onload = () => {
@@ -145,7 +158,6 @@ export default function Chat() {
         data: reader.result
       });
     };
-    handleSendMessage(e);
   }
 
   return (
@@ -193,10 +205,10 @@ export default function Chat() {
           {selectedUserId ? (
             <Box className='relative h-full'>
               <Box className='overflow-y-scroll absolute top-0 left-0 right-0 bottom-2'>
-                {messagesWithoutDuplicates?.map((message: any) => (
+                {messagesWithoutDuplicates?.map((message: Message) => (
                   <MessageBubble
                     key={message._id}
-                    id={message._id}
+                    messageId={message._id}
                     sender={message.sender === id}
                     file={message.file}
                     text={message.text}

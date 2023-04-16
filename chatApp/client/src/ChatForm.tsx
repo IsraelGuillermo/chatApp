@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '1rem',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'flex',
+    alignItems: 'center',
     borderRadius: theme.spacing(0.5),
     cursor: 'pointer',
     marginRight: theme.spacing(1),
@@ -61,7 +61,7 @@ export default function ChatForm({
     <form className={classes.container} onSubmit={onSubmit}>
       <TextField
         error={isMessageEmpty}
-        helperText={isMessageEmpty && 'Message cannot be empty'}
+        helperText={isMessageEmpty === true ? 'Message cannot be empty' : ''}
         variant='outlined'
         value={value}
         onChange={(e) => {
