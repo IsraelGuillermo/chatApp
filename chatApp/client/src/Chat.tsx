@@ -179,7 +179,10 @@ export default function Chat() {
           </Button>
         </Box>
       </Box>
-      <Box className='flex flex-col bg-blue-50 w-2/3 p-2'>
+      <Box
+        className='flex flex-col w-2/3 p-2'
+        style={{ backgroundColor: '#3C486B' }}
+      >
         <Box className='flex-grow'>
           {selectedUserId ? (
             <Box className='relative h-full'>
