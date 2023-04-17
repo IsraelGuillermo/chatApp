@@ -104,10 +104,11 @@ export default function Chat() {
         }
       ]);
     }
-
-    axios
-      .get('/messages/' + selectedUserId)
-      .then((res) => setMessages(res.data));
+    if (file) {
+      axios
+        .get('/messages/' + selectedUserId)
+        .then((res) => setMessages(res.data));
+    }
   }
 
   useEffect(() => {
@@ -158,6 +159,7 @@ export default function Chat() {
         data: reader.result
       });
     };
+    handleSendMessage(e);
   }
 
   return (
