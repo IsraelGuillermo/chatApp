@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import Logo from './Logo';
 import { UserContext } from './UserContext';
 import { uniqBy } from 'lodash';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Slide } from '@material-ui/core';
 import axios from 'axios';
 import Contact from './Contact';
 import MessageBubble from './MessageBubble';
@@ -25,7 +25,7 @@ export default function Chat() {
   const [selectedUserId, setSelectedUserId] = useState('');
   const [newMessageText, setNewMessageText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [offlinePeople, setOfflinePeople] = useState({});
+  const [offlinePeople, setOfflinePeople] = useState<any>({});
   const [isMessageEmpty, setIsMessageEmpty] = useState(false);
   const divUnderMessages: React.MutableRefObject<HTMLElement | undefined> =
     useRef();
@@ -116,7 +116,7 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    const div = divUnderMessages.current;
+    const div: any = divUnderMessages.current;
     if (div) {
       div.scrollIntoView({ behavior: 'auto', block: 'end' });
     }
@@ -216,7 +216,9 @@ export default function Chat() {
                     text={message.text}
                   />
                 ))}
-                <Box className='h-12' ref={divUnderMessages}></Box>
+                <Slide direction='down' ref={divUnderMessages}>
+                  <Box className='h-20'></Box>
+                </Slide>
               </Box>
             </Box>
           ) : (
