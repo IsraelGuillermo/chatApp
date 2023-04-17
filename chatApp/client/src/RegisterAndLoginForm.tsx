@@ -35,6 +35,13 @@ const useStyles = makeStyles((theme) => ({
   },
   typography: {
     marginRight: 8
+  },
+  welcomeContainer: {
+    textAlign: 'center',
+    marginBottom: theme.spacing(5)
+  },
+  welcomeTypography: {
+    fontWeight: 900
   }
 }));
 
@@ -76,6 +83,11 @@ export default function RegisterAndLoginForm() {
   return (
     <Box className={classes.container}>
       <form className={classes.form} onSubmit={handleSubmit}>
+        <Box className={classes.welcomeContainer}>
+          <Typography variant='h5' className={classes.welcomeTypography}>
+            Welcome To ChatAPP Register or Login to chat with a stranger
+          </Typography>
+        </Box>
         {incorrectLogin && (
           <Box className={classes.errorContainer}>
             <Typography variant='body1' color='error'>
