@@ -2,13 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-const User = require('./models/User');
+const User = require('../models/User');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const PORT = process.env.PORT || 4040;
 const ws = require('ws');
-const Message = require('./models/Message');
+const Message = require('../models/Message');
 const fs = require('fs');
 dotenv.config();
 
