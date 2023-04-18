@@ -37,11 +37,11 @@ app.use(cors());
 //---- other code
 
 //Preflight CORS handler
-if (req.method === 'OPTIONS') {
-  return res.status(200).json({
-    body: 'OK'
-  });
-}
+// if (req.method === 'OPTIONS') {
+//   return res.status(200).json({
+//     body: 'OK'
+//   });
+// }
 // };
 
 async function getUserDataFromRequest(req) {
