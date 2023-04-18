@@ -41,7 +41,7 @@ export default function Chat() {
   }, [selectedUserId]);
 
   function connectToWs() {
-    const ws = new WebSocket('ws://localhost:4040');
+    const ws = new WebSocket('https://chat-app-api-eight.vercel.app/');
     setWs(ws);
     ws.addEventListener('message', handleMessage);
     ws.addEventListener('close', () => {
