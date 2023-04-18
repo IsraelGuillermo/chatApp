@@ -21,42 +21,45 @@ app.use('/uploads', express.static(__dirname + '/uploads'));
 app.use(cookieParser());
 app.use(cors());
 
-// module.exports = (req, res) => {
-//   //set header first to allow request or origin domain (value can be different)
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept'
-//   );
+// const allowCors = (fn) => async (req, res) => {
 //   res.setHeader('Access-Control-Allow-Credentials', true);
+//   res.setHeader('Access-Control-Allow-Origin', '*');
+//   // another common pattern
+//   // res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
 //   res.setHeader(
 //     'Access-Control-Allow-Methods',
-//     'GET, POST, PUT, PATCH, OPTIONS, DELETE'
+//     'GET,OPTIONS,PATCH,DELETE,POST,PUT'
 //   );
-
-//---- other code
-
-//Preflight CORS handler
-// if (req.method === 'OPTIONS') {
-//   return res.status(200).json({
-//     body: 'OK'
-//   });
-// }
+//   res.setHeader(
+//     'Access-Control-Allow-Headers',
+//     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+//   );
+//   if (req.method === 'OPTIONS') {
+//     res.status(200).end();
+//     return;
+//   }
+//   return await fn(req, res);
 // };
 
-async function getUserDataFromRequest(req) {
-  return new Promise((resolve, reject) => {
-    const token = req.cookies?.token;
-    if (token) {
-      jwt.verify(token, jwtSecret, {}, (err, userData) => {
-        if (err) throw err;
-        resolve(userData);
-      });
-    } else {
-      reject('No Token');
-    }
-  });
-}
+// const handler = (req, res) => {
+//   const d = new Date();
+//   res.end(d.toString());
+// };
+
+// module.exports = allowCors(handler);
+// async function getUserDataFromRequest(req) {
+//   return new Promise((resolve, reject) => {
+//     const token = req.cookies?.token;
+//     if (token) {
+//       jwt.verify(token, jwtSecret, {}, (err, userData) => {
+//         if (err) throw err;
+//         resolve(userData);
+//       });
+//     } else {
+//       reject('No Token');
+//     }
+//   });
+// }
 
 function notifyAboutOnlinePeople() {
   [...wss.clients].forEach((client) => {
